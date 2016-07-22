@@ -2,12 +2,18 @@
 
 Parses GC tracing output into a JSON. 
 
+## Install
+
+```bash
+npm install gc-log-parser
+```
+
 ## Sample usage
 
 Run a watched script in a child process, read its output and print parsed GC stats.
 
 ```javascript
-var GcLogParser = require('./');
+var GcLogParser = require('gc-log-parser');
 var spawn = require('child_process').spawn;
 
 var gc = new GcLogParser();
