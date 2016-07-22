@@ -1,5 +1,5 @@
 var GcLogParser = require('./');
-const spawn = require('child_process').spawn;
+var spawn = require('child_process').spawn;
 
 var gc = new GcLogParser();
 gc.on('stats', function (stats) {

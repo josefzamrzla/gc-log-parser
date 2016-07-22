@@ -1,6 +1,6 @@
-# V8 garbage collector log parser
+# V8 garbage collector tracing output parser
 
-Parses GC trace output to a JSON. 
+Parses GC tracing output into a JSON. 
 
 ## Sample usage
 
@@ -8,7 +8,7 @@ Run a watched script in a child process, read its output and print parsed GC sta
 
 ```javascript
 var GcLogParser = require('./');
-const spawn = require('child_process').spawn;
+var spawn = require('child_process').spawn;
 
 var gc = new GcLogParser();
 gc.on('stats', function (stats) {
