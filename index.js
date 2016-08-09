@@ -4,38 +4,45 @@ var util = require('util'), events = require('events');
 var GcLogParser = function () {
 	this.types = [
 		{
-			name: 'head',
+			name: 'Head, nvp',
+			required: [3, 6],
 			r: /^(\[[^\]]+\])(\s+)([0-9]+)(\s+)ms:(\s+)(.*)$/,
 			fn: this._parseHead
 		},
 		{
-			name: 'head_v4',
+			name: 'Head, nvp (node v4)',
+			required: [5, 8],
 			r: /^(\[[^\]]+\])(\s+)(\[[^\]]+\])(\s+)([0-9]+)(\s+)ms:(\s+)(.*)$/,
 			fn: this._parseHeadv4
 		},
 		{
-			name: 'spaces',
+			name: 'Spaces',
+			required: [2, 5, 9, 13],
 			r: /^(\[[^\]]+\])([^,]+),(\s+)used:(\s+)(\d+)(\s+)KB,(\s+)available:(\s+)(\d+)(\s+)KB,(\s+)committed:(\s+)(\d+)/,
 			fn: this._parseSpaces
 		},
 		{
-			name: 'allocator',
+			name: 'Memory allocator',
+			required: [2, 5, 9],
 			r: /^(\[[^\]]+\])([^,]+),(\s+)used:(\s+)(\d+)(\s+)KB,(\s+)available:(\s+)(\d+)/,
 			fn: this._parseAllocator
 		},
 		{
-			name: 'tail',
+			name: 'Time spent in GC',
+			required: [5],
 			r: /^(\[[^\]]+\])(\s+)Total([^:]+):(\s+)([0-9\.]+)/,
 			fn: this._parseTail,
 			emit: true
 		},
 		{
-			name: 'external_mem',
+			name: 'External memory',
+			required: [2, 4],
 			r: /^(\[[^\]]+\])([\s]+External[^:]+):(\s+)(\d+)/,
 			fn: this._parseExternalMem
 		},
 		{
-			name: 'other',
+			name: 'Other',
+			required: [],
 			r: /^\[[^\]]+\]/,
 			fn: this._noop
 		}
@@ -52,11 +59,25 @@ GcLogParser.prototype.parse = function (line) {
 	for (var i = 0; i < this.types.length; i++) {
 		var matches = line.match(this.types[i].r);
 		if (matches) {
-			this.types[i].fn.call(this, matches);
+
+			var errors = this._validate(matches, this.types[i].required);
+			if (errors === null) {
+				try {
+					this.types[i].fn.call(this, matches);
+				} catch (e) {
+					this.emit('error', e);
+				}
+			} else {
+				this.emit('error', new Error(
+					'Missing keys: [' + errors.join(',') + '] for type: ' + this.types[i].name +
+					'. Required: [' + this.types[i].required.join(',') + ']'));
+			}
+
 			if (this.types[i].emit) {
 				this.emit('stats', this.stats);
 				this._reset();
 			}
+
 			return true;
 		}
 	}
@@ -131,6 +152,21 @@ GcLogParser.prototype._reset = function () {
 		},
 		spaces: []
 	};
+};
+
+GcLogParser.prototype._validate = function (matches, required) {
+	if (!required.length) return null;
+
+	var missing = [];
+	required.forEach(function (key) {
+		if (!(key in matches)) {
+			missing.push(key);
+		}
+	});
+
+	if (missing.length) return missing;
+
+	return null;
 };
 
 module.exports = GcLogParser;

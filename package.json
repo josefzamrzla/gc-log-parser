@@ -1,7 +1,7 @@
 {
   "name": "gc-log-parser",
   "version": "1.0.0",
-  "description": "V8 garbage collector log parser",
+  "description": "V8 garbage collector tracing output parser",
   "main": "index.js",
   "repository": {
     "type": "git",
@@ -10,7 +10,9 @@
   "keywords": [
     "v8",
     "gc",
-    "trace_gc"
+    "trace_gc",
+    "trace_gc_verbose",
+    "trace_gc_nvp"
   ],
   "author": "Josef Zamrzla",
   "license": "ISC"
