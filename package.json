@@ -1,6 +1,6 @@
 {
   "name": "gc-log-parser",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "V8 garbage collector tracing output parser",
   "main": "index.js",
   "repository": {
